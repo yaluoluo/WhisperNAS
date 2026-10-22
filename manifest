@@ -1,0 +1,17 @@
+appname=whispernas
+version=0.1.5
+desc=基于 Whisper.cpp 的本地音视频字幕生成工具
+display_name=Whisper NAS
+maintainer=Whisper.cpp
+distributor=Luohe
+platform=x86
+desktop_uidir=ui
+desktop_applaunchname=whispernas.main
+source=thirdparty
+install_dep_apps=nodejs_v22
+os_min_version=1.1.3100
+ctl_stop=true
+
+checkport=false
+
+micro_app=true

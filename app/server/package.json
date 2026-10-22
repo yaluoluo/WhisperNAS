@@ -1,0 +1,19 @@
+{
+  "name": "whispernas-backend",
+  "version": "0.1.5",
+  "private": true,
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "build:picker": "esbuild public/picker-entry.js --bundle --platform=browser --format=iife --global-name=WhisperPicker --outfile=public/trim-picker.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1"
+  },
+  "devDependencies": {
+    "@trimjs/web-app": "latest",
+    "esbuild": "^0.25.0"
+  }
+}

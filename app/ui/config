@@ -1,0 +1,14 @@
+{
+  ".url": {
+    "whispernas.main": {
+      "title": "Whisper NAS",
+      "icon": "images/icon_{0}.png",
+      "type": "iframe",
+      "protocol": "",
+      "gatewayPrefix": "/app/whispernas",
+      "gatewaySocket": "app.sock",
+      "url": "/app/whispernas",
+      "allUsers": true
+    }
+  }
+}

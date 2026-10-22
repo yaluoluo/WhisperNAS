@@ -1,0 +1,11 @@
+{
+  "defaults": {
+    "run-as": "package"
+  },
+  "username": "whispernas",
+  "groupname": "whispernas",
+  "join-groups": [
+    "video",
+    "render"
+  ]
+}

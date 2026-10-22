@@ -1,0 +1,12 @@
+{
+  "data-share": {
+    "shares": [
+      {
+        "name": "whispernas/data"
+      }
+    ]
+  },
+  "api-scope": [
+    "trim.file.userAccess"
+  ]
+}

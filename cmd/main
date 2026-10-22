@@ -1,0 +1,40 @@
+#!/bin/bash
+set -u
+
+APP_ROOT="/var/apps/whispernas"
+APP_DIR="${TRIM_APPDEST:-$APP_ROOT/target}"
+SERVER_DIR="${APP_DIR}/server"
+DATA_DIR="${TRIM_DATA_SHARE_PATHS:-$APP_ROOT/shares/data}"
+DATA_DIR="${DATA_DIR%%:*}"
+PKGVAR="${TRIM_PKGVAR:-$APP_ROOT/var}"
+LOG_FILE="${PKGVAR}/whispernas.log"
+PID_FILE="${PKGVAR}/whispernas.pid"
+SOCKET_PATH="${APP_DIR}/app.sock"
+NODE="/var/apps/nodejs_v22/target/bin/node"
+
+mkdir -p "$DATA_DIR/models" "$DATA_DIR/media" "$DATA_DIR/tmp" "$PKGVAR" || exit 1
+log(){ echo "[$(date '+%F %T')] $*" >> "$LOG_FILE"; }
+running(){ [ -f "$PID_FILE" ] && kill -0 "$(cat "$PID_FILE" 2>/dev/null)" 2>/dev/null; }
+start(){
+  if running; then exit 0; fi
+  [ -x "$NODE" ] || NODE="$(command -v node || true)"
+  if [ -z "$NODE" ] || [ ! -x "$NODE" ]; then log "Node.js runtime not found"; exit 1; fi
+  if [ ! -d "$SERVER_DIR" ]; then log "Server directory not found: $SERVER_DIR"; exit 1; fi
+  export DATA_DIR SOCKET_PATH GATEWAY_PREFIX="/app/whispernas" FFMPEG_PATH="${FFMPEG_PATH:-ffmpeg}"
+  export PATH="/var/apps/nodejs_v22/target/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+  cd "$SERVER_DIR" || { log "Cannot enter server directory: $SERVER_DIR"; exit 1; }
+  log "Starting Whisper NAS; APP_DIR=$APP_DIR DATA_DIR=$DATA_DIR NODE=$NODE FFMPEG_PATH=$FFMPEG_PATH"
+  "$NODE" server.js >> "$LOG_FILE" 2>&1 &
+  echo $! > "$PID_FILE"
+  sleep 2
+  if ! running; then log "Startup failed; inspect log above for Node.js error"; rm -f "$PID_FILE"; exit 1; fi
+  log "Started successfully; PID=$(cat "$PID_FILE")"
+}
+stop(){
+  if ! running; then rm -f "$PID_FILE" "$SOCKET_PATH"; exit 0; fi
+  pid="$(cat "$PID_FILE")"; kill -TERM "$pid" 2>/dev/null || true
+  n=0; while kill -0 "$pid" 2>/dev/null && [ "$n" -lt 10 ]; do sleep 1; n=$((n+1)); done
+  kill -KILL "$pid" 2>/dev/null || true
+  rm -f "$PID_FILE" "$SOCKET_PATH"; log "Stopped"
+}
+case "${1:-}" in start) start;; stop) stop;; status) running;; *) echo "Usage: $0 {start|stop|status}" > "${TRIM_TEMP_LOGFILE:-/dev/null}"; exit 1;; esac
